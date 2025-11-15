@@ -78,7 +78,7 @@ function FilterBar() {
       </div>
 
       <Select value={state.statusFilter} onValueChange={(v) => dispatch(setStatusFilter(v as any))}>
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="w-full sm:w-32">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ function FilterBar() {
       </Select>
 
       <Select value={state.priorityFilter} onValueChange={(v) => dispatch(setPriorityFilter(v as any))}>
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="w-full sm:w-32">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
