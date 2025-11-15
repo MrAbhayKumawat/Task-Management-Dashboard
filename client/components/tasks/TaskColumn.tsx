@@ -13,6 +13,7 @@ interface TaskColumnProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onAddTask: () => void;
+  showAddButton?: boolean;
 }
 
 const statusConfig: Record<TaskStatus, { color: string; icon: string }> = {
@@ -21,12 +22,12 @@ const statusConfig: Record<TaskStatus, { color: string; icon: string }> = {
   done: { color: 'bg-green-100 dark:bg-green-900', icon: '✅' },
 };
 
-export function TaskColumn({ status, title, tasks, onEdit, onDelete, onAddTask }: TaskColumnProps) {
+export function TaskColumn({ status, title, tasks, onEdit, onDelete, onAddTask, showAddButton = false }: TaskColumnProps) {
   const { setNodeRef } = useDroppable({ id: status });
   const { color, icon } = statusConfig[status];
 
   return (
-    <div className={cn('rounded-lg flex flex-col h-full', color)}>
+    <div className={cn('rounded-lg flex flex-col h-full min-h-[500px]', color)}>
       <div className="p-4 border-b border-gray-300 dark:border-slate-700">
         <div className="flex items-center gap-2 mb-3">
           <span>{icon}</span>
@@ -35,10 +36,12 @@ export function TaskColumn({ status, title, tasks, onEdit, onDelete, onAddTask }
             {tasks.length}
           </span>
         </div>
-        <Button variant="outline" size="sm" className="w-full text-xs" onClick={onAddTask}>
-          <Plus className="w-3 h-3 mr-1" />
-          Add Task
-        </Button>
+        {showAddButton && (
+          <Button variant="outline" size="sm" className="w-full text-xs" onClick={onAddTask}>
+            <Plus className="w-3 h-3 mr-1" />
+            Add Task
+          </Button>
+        )}
       </div>
 
       <div ref={setNodeRef} className="flex-1 overflow-y-auto p-4 space-y-3">

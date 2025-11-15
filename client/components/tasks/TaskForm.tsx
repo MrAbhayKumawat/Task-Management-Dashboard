@@ -24,7 +24,7 @@ interface FormData {
 }
 
 export function TaskForm({ isOpen, task, onClose, onSubmit }: TaskFormProps) {
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
@@ -33,6 +33,9 @@ export function TaskForm({ isOpen, task, onClose, onSubmit }: TaskFormProps) {
       dueDate: task?.dueDate || '',
     },
   });
+
+  const statusValue = watch('status');
+  const priorityValue = watch('priority');
 
   useEffect(() => {
     if (task) {
@@ -87,9 +90,9 @@ export function TaskForm({ isOpen, task, onClose, onSubmit }: TaskFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select defaultValue={watch('status')}>
+              <Select value={statusValue} onValueChange={(value) => setValue('status', value as TaskStatus)}>
                 <SelectTrigger className="mt-1">
-                  <SelectValue />
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todo">To Do</SelectItem>
@@ -97,14 +100,14 @@ export function TaskForm({ isOpen, task, onClose, onSubmit }: TaskFormProps) {
                   <SelectItem value="done">Done</SelectItem>
                 </SelectContent>
               </Select>
-              <input type="hidden" {...register('status')} value={watch('status')} />
+              <input type="hidden" {...register('status')} value={statusValue} />
             </div>
 
             <div>
               <Label htmlFor="priority">Priority</Label>
-              <Select defaultValue={watch('priority')}>
+              <Select value={priorityValue} onValueChange={(value) => setValue('priority', value as 'low' | 'medium' | 'high')}>
                 <SelectTrigger className="mt-1">
-                  <SelectValue />
+                  <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low</SelectItem>
@@ -112,7 +115,7 @@ export function TaskForm({ isOpen, task, onClose, onSubmit }: TaskFormProps) {
                   <SelectItem value="high">High</SelectItem>
                 </SelectContent>
               </Select>
-              <input type="hidden" {...register('priority')} value={watch('priority')} />
+              <input type="hidden" {...register('priority')} value={priorityValue} />
             </div>
           </div>
 

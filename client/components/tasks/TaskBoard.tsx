@@ -7,11 +7,12 @@ import { DndContext, DragEndEvent, DragStartEvent, DragCancelEvent, closestCorne
 import { createTask, updateTask as updateTaskAPI, deleteTask as deleteTaskAPI, getTasks } from '@/api/mockTasks';
 import { toast } from '@/hooks/use-toast';
 import { AppDispatch, RootState } from '@/store';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const COLUMNS = [
   { status: 'todo' as TaskStatus, title: 'To Do' },
   { status: 'in-progress' as TaskStatus, title: 'In Progress' },
-  { status: 'done' as TaskStatus, title: 'Done' },
+  { status: 'done' as TaskStatus, title: 'Completed' },
 ];
 
 export function TaskBoard() {
@@ -100,11 +101,6 @@ export function TaskBoard() {
     }
   };
 
-  const tasksByStatus = COLUMNS.map(({ status }) => ({
-    status,
-    tasks: filteredTasks.filter(t => t.status === status),
-  }));
-
   if (loading && filteredTasks.length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -119,19 +115,38 @@ export function TaskBoard() {
   return (
     <>
       <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragCancel={() => setActiveId(null)} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-max">
-          {tasksByStatus.map(({ status, tasks }) => (
-            <TaskColumn
-              key={status}
-              status={status}
-              title={COLUMNS.find(c => c.status === status)?.title || ''}
-              tasks={tasks}
-              onEdit={openForm}
-              onDelete={handleDelete}
-              onAddTask={() => openForm(null)}
-            />
-          ))}
-        </div>
+        <Tabs defaultValue="todo" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            {COLUMNS.map(({ status, title }) => {
+              const tasks = filteredTasks.filter(t => t.status === status);
+              return (
+                <TabsTrigger key={status} value={status} className="relative">
+                  {title}
+                  <span className="ml-2 bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium">
+                    {tasks.length}
+                  </span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {COLUMNS.map(({ status, title }) => {
+            const tasks = filteredTasks.filter(t => t.status === status);
+            return (
+              <TabsContent key={status} value={status} className="mt-0">
+                <TaskColumn
+                  status={status}
+                  title={title}
+                  tasks={tasks}
+                  onEdit={openForm}
+                  onDelete={handleDelete}
+                  onAddTask={() => openForm(null)}
+                  showAddButton={status === 'todo'}
+                />
+              </TabsContent>
+            );
+          })}
+        </Tabs>
       </DndContext>
 
       <TaskForm isOpen={isFormOpen} task={editingTask} onClose={closeForm} onSubmit={handleSubmit} />

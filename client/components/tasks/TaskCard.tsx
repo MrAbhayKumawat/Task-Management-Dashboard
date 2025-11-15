@@ -28,6 +28,12 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
 
+  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -44,15 +50,13 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         <h3 className="flex-1 font-medium text-gray-900 dark:text-white text-sm line-clamp-2">
           {task.title}
         </h3>
-        <div className="flex gap-1">
+        <div className="flex gap-1" onPointerDown={(e) => e.stopPropagation()}>
           <Button
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(task);
-            }}
+            onClick={(e) => handleButtonClick(e, () => onEdit(task))}
+            onPointerDown={(e) => e.stopPropagation()}
           >
             <Edit2 className="w-3 h-3" />
           </Button>
@@ -60,10 +64,8 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(task.id);
-            }}
+            onClick={(e) => handleButtonClick(e, () => onDelete(task.id))}
+            onPointerDown={(e) => e.stopPropagation()}
           >
             <Trash2 className="w-3 h-3" />
           </Button>
