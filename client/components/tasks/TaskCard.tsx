@@ -1,7 +1,6 @@
-import { Task } from '@/store/taskSlice';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Trash2, Edit2 } from 'lucide-react';
+import { Task, TaskStatus } from '@/store/taskSlice';
+import { useDraggable } from '@dnd-kit/core';
+import { Trash2, Edit2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +8,7 @@ interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+  onMoveTask: (taskId: string, newStatus: TaskStatus) => void;
 }
 
 const priorityBadge = {
@@ -17,14 +17,10 @@ const priorityBadge = {
   high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
-export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
-  const { setNodeRef, transform, transition, isDragging, attributes, listeners } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+export function TaskCard({ task, onEdit, onDelete, onMoveTask }: TaskCardProps) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: task.id,
+  });
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
 
@@ -34,14 +30,21 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
     action();
   };
 
+  const getAvailableStatuses = (): TaskStatus[] => {
+    if (task.status === 'todo') return ['in-progress', 'done'];
+    if (task.status === 'in-progress') return ['done'];
+    return [];
+  };
+
+  const availableStatuses = getAvailableStatuses();
+
   return (
     <div
       ref={setNodeRef}
-      style={style}
       className={cn(
         'bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4',
         'cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md',
-        isDragging && 'shadow-lg opacity-50'
+        isDragging && 'opacity-50 shadow-lg'
       )}
       {...attributes}
       {...listeners}
@@ -78,7 +81,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         </p>
       )}
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
         <span className={cn('text-xs px-2 py-1 rounded-full font-medium', priorityBadge[task.priority])}>
           {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
         </span>
@@ -92,6 +95,40 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           </span>
         )}
       </div>
+
+      {/* Mobile action buttons - only show on mobile */}
+      {availableStatuses.length > 0 && (
+        <div className="flex gap-2 mt-3 md:hidden">
+          {availableStatuses.includes('in-progress') && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveTask(task.id, 'in-progress');
+              }}
+            >
+              <ArrowRight className="w-3 h-3 mr-1" />
+              In Progress
+            </Button>
+          )}
+          {availableStatuses.includes('done') && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveTask(task.id, 'done');
+              }}
+            >
+              <CheckCircle2 className="w-3 h-3 mr-1" />
+              Done
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
