@@ -9,7 +9,11 @@ export default defineConfig({
   build: {
     outDir: "dist",
   },
-  plugins: [react()],
+  plugins: [  react({
+    babel: {
+      plugins: ['babel-plugin-react-compiler'],
+    },
+  }),],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
